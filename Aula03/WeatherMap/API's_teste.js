@@ -43,10 +43,11 @@ for (let previsao of res) {console.log(`
     ${'Hum: ' + previsao.main.humidity}%, 
     ${previsao.weather[0].description}
 `);
+    
 }
 return res;}).then((res) => {
 
 //verifica quantas previsões têm percepção humana de tempertura acima de 30 graus
 const lista = res.filter(r => r.main.feels_like >= 25);
 console.log (`${lista.length} previsões têm percepção humana de temperatura acima de 25 graus`)
-});
+})
