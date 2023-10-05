@@ -5,7 +5,7 @@ const axios = require('axios')
 const appid = "cbac88e90ee60ae095ee949fcc3eadd1"
 
 //Cidade de pesquisa
-const q = 'Itu'
+const q = 'Suzano'
 
 //unidade de medida
 const units = 'metric'
