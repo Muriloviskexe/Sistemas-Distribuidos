@@ -1,35 +1,35 @@
-//cria uma constante 'express' que faz a requisão do serviço instalado
 const express = require('express');
-//cria a constante 'app' que executa o 'express'
+const axios = require("axios");
 const app = express();
-//faz uma requisição do tipo 'use' que transforma express em json
 app.use(express.json());
+const lembretes = {};
+contador = 0;
 
-//cria uma constante 'lembretes' que é uma array vazia 
-const lembretes = {}
-contador = 0
- 
-//faz um requisição 'get' para 'lembretes', uma function que tem com param 'req' e 'res'
-//ao executar a function (fazer o get) ele responde com os lembretes, no caso a array vazia por enquanto
 app.get('/lembretes', (req, res) => {
-res.send(lembretes)
-})
+    res.send(lembretes);
+});
 
-
-//fazer uma req do tipo 'post' para o lembretes, que tem como param 'req' e 'res', fazendo a requisição ele soma um numero no contator e cria uma constante que que faz a req do body (para inserir os lembretes novos), para o lembrete de cada numero do contator ele imprime o contador e o texto inserido
-app.post('/lembretes', (req, res) => {
-    contador ++
-    
-    const { texto } = req.body
+app.post('/lembretes', async (req, res) => {
+    contador++;
+    const { texto } = req.body;
     lembretes[contador] = {
         contador, texto
     }
+    await axios.post("http://localhost:10000/eventos", {
+        tipo: "LembreteCriado",
+        dados: {
+            contador,
+            texto,
+        },
+    });
+    res.status(201).send(lembretes[contador]);
+});
 
-//a resposta da req é um status 201 (sucess) e envia o lembrete com o contator proprio
-    res.status(201).send(lembretes[contador])
-})
+app.post("/eventos", (req, res) => {
+    console.log(req.body);
+    res.status(200).send({ msg: "ok" });
+});
 
-//faz um req de listen que vai ficar escutando a porta 4000 para qualquer comunicação nela
 app.listen(4000, () => {
-console.log('Lembretes. Porta 4000')
-})
+    console.log('Lembretes. Porta 4000');
+});

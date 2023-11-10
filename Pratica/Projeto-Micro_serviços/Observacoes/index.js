@@ -1,45 +1,40 @@
-//* cria uma constante 'express' que faz a requisão do serviço instalado
 const express = require('express');
-
-//* cria a constante 'app' que executa o 'express'
+const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 const app = express();
-
-//* faz uma requisição do tipo 'use' que transforma express em json
 app.use(express.json());
 
-const observacoesPorLembreteId = {}
-const { v4: uuidv4 } = require('uuid');
+const observacoesPorLembreteId = {};
 
-//* :id é um placeholder
-//* exemplo: /lembretes/123456/observacoes
-app.post('/lembretes/:id/observacoes', (req, res) => {
-    //Pede um ID pro UUID
+//:id é um placeholder
+//exemplo: /lembretes/123456/observacoes
+app.post('/lembretes/:id/observacoes', async (req, res) => {
     const idObs = uuidv4();
-
-    //Define o texto para adicionar à observação
     const { texto } = req.body;
-
     //req.params dá acesso à lista de parâmetros da URL
     const observacoesDoLembrete =
-    observacoesPorLembreteId[req.params.id] || []
-
-    //adicionar ao lembrete com o id criado o texto que foi enviado
-    //push insere 
-    observacoesDoLembrete.push({ id: idObs, texto })
-
-    //pega o id indicado e adiciona o texto inserido pelo push
+        observacoesPorLembreteId[req.params.id] || [];
+    observacoesDoLembrete.push({ id: idObs, texto });
     observacoesPorLembreteId[req.params.id] =
-    observacoesDoLembrete
+        observacoesDoLembrete;
+    await axios.post('http://localhost:10000/eventos', {
+        tipo: "ObservacaoCriada",
+        dados: {
+            id: idObs, texto, lembreteId: req.params.id
+        }
+    });
+    res.status(201).send(observacoesDoLembrete);
+});
 
-    res.status(201).send(observacoesDoLembrete)
-})
-
-//* faz a req de get para puxar as observações
 app.get('/lembretes/:id/observacoes', (req, res) => {
     res.send(observacoesPorLembreteId[req.params.id] || []);
-})
+});
 
+app.post("/eventos", (req, res) => {
+    console.log(req.body);
+    res.status(200).send({ msg: "ok" });
+});
 
-app.listen(5000, () => {
-    console.log('Observações. Porta 5000')
-})
+app.listen(5000, (() => {
+    console.log('Observacoes. Porta 5000');
+}));
